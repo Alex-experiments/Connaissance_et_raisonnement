@@ -1,0 +1,147 @@
+%%% DONNEES DIRECTEMENT ISSUES DE L'ENONCE
+
+%Jean est une personne
+Personne(Jean).
+
+%Les tomates sont de la nourriture
+Nourriture(Tomate).
+
+%La viande hachee est de la viande
+Viande(ViandeHachee).
+
+%Hier est un temps
+Temps(hier).
+
+%Jean a achete un kilo de tomate hier à Safeway
+Achete(Jean,Tomate,Safeway,UnKilo,hier).
+
+%Jean a achete une livre de viande hachee hier à Safeway
+Achete(Jean,ViandeHachee,Safeway,UneLivre,hier).
+
+%Safeway est un supermarche
+Supermarche(Safeway).
+
+%%%% Question 1 
+%Tout ce qui est de la viande est de la nourriture
+all x (Viande(x) -> Nourriture(x)).
+
+%Tout ce qui est de la nourriture est un item
+all x (Nourriture(x) -> Item(x)).
+
+%Jean possède une carte de crédit
+PossedeCarteCredit(Jean).
+
+%Toute personne qui possède une carte de crédit est un adulte
+all x (Personne(x) & PossedeCarteCredit(x)-> Adulte(x)).
+
+%Un enfant n'est pas un adulte
+all x (Enfant(x)-> -Adulte(x)).
+
+%%% Question 2 
+%UnKilo est un Kilo
+Kilo(UnKilo).
+
+%Les kilos sont des masses
+all q(Kilo(q)-> Masse(q)).
+
+%UneLivre est une livre
+Livre(UneLivre).
+
+%Les livres sont des masses
+all q(Livre(q)-> Masse(q)).
+
+%PossedeMasse(x, y, q) signifie x possède q masses de y
+%Toute personne x qui achete un item y dans un supermarché z en masse Q à un moment t possède Q masses de y et apporte un moyen de paiement
+all x all y all z all q all t (Achete(x,y,z,q,t) & Personne(x) & Item(y) & Supermarche(z) & Masse(q) & Temps(t) -> PossedeMasse(x,y,q) & ApporteMoyenPaiement(x)).
+
+%PossedeAuMoinsQuantite(x, y, q) signifie x possède q unités de y
+%Toute personne qui possede UnKilo de tomate possede au moins deux tomates
+all x (PossedeMasse(x,Tomate,UnKilo)-> exists n (PossedeAuMoinsQuantite(x, Tomate, n) & PlusQue(n, deux))).
+
+%Toute personne x ayant n1 quantité de y avec n1 >= n2 en possède aussi n2 quantité
+all x all y all n1 all n2 (PossedeAuMoinsQuantite(x, y, n1) & PlusQue(n1, n2) -> PossedeAuMoinsQuantite(x, y, n2)).
+
+%%% QUESTION 3
+%Toute personne x qui achete de la viande a achete de la viande
+all x all y all z all q all t (Achete(x,y,z,q,t) & Personne(x) & Viande(y) & Supermarche(z) & Masse(q) & Temps(t) -> A_AcheteViande(x)).
+
+%%% QUESTION 4
+
+%Toute personne x et toute personne m qui achètent le même item y au même supermarche z au même moment se rencontrent
+all x all y all z all m all t all q1 all q2(Personne(x) & Achete(x,y,z,q1,t) & Personne(m) & Achete(m,y,z,q2,t) & Item(y) & Supermarche(z) & Temps(t)->Rencontre(x,m)).
+
+%%% QUESTION 5
+%Les supermarches ne préparent aucun item
+all z all y(Supermarche(z) & Item(y) -> -Prepare(z,y)).
+
+%%% QUESTION 6
+%Toute personne qui achete de la nourriture en mange
+all x all y(exists z exists q exists t(Personne(x) & Achete(x,y,z,q,t) & Nourriture(y)) -> Mange(x,y)).
+
+%%% QUESTION 7
+%Les déodorants sont des produits non alimentaire
+ProduitNonAlimentaire(Deodorant).
+
+%Les produits non alimentaires sont des items
+all x(ProduitNonAlimentaire(x)->Item(x)).
+
+%Tout Supermarche z qui a vendu un item y à un client x à un moment t possède l'item y
+all y all z(exists x exists t exists q(Supermarche(z) & Item(y) & Achete(x, y, z, q, t)) -> Has(x, y)).
+
+%Tout supermarché possède des déodorants
+all z(Supermarche(z) -> Has(z, Deodorant)).
+
+%Tout supermarche z qui possède un item y le vend
+all y all z(Supermarche(z) & Item(y) &  Has(z, y) -> Vend(z, y)).
+
+%%% QUESTION 8
+%Toute personne qui apporte un moyen de paiement apporte soit une carte de crédit soit du cash
+all x (ApporteMoyenPaiement(x) -> ApporteCarteCredit(x) | ApporteCash(x)).
+
+%Toute personne qui apporte une carte de crédit en possède une
+all x (ApporteCarteCredit(x) -> PossedeCarteCredit(x)).
+
+%Toute personne qui apporte du cash a possédé de l'argent en quantité m à un moment t
+all x (ApporteCash(x) -> exists m exists t(A_Argent(x, m, t))).
+
+%%% QUESTION 9
+%Jean avait une quantite d'argent M1 hier
+A_Argent(Jean, M1, hier).
+
+%aujourdhui est un temps
+Temps(aujourdhui).
+
+%hier est avant aujourdhui
+EstAvant(hier, aujourdhui).
+
+%Pour toute quantités m1, m2, si m1 est moins que m2 alors m2 est plus que m1
+all m1 all m2(MoinsQue(m1, m2) -> PlusQue(m2, m1)).
+
+%Toute personne qui achete un produit à a instant t1, qui possède de l'argent en quantité m1 possède de l'argent en quantité m2 à t2 avec m2 < m1 si t1 est avant t2
+all x all y all z all q all t1 all t2 all m1 all m2(Achete(x,y,z,q,t1) & A_Argent(x,m1,t1) & EstAvant(t1, t2) ->A_Argent(x,m2,t2) & MoinsQue(m2,m1)).
+
+
+
+%Q1
+%Adulte(Jean).
+%Q2
+%PossedeAuMoinsQuantite(Jean, Tomate, deux).
+%PlusQue(deux, un) -> PossedeAuMoinsQuantite(Jean, Tomate, un).
+%Q3
+%A_AcheteViande(Jean).
+%Q4
+%Personne(Marie) & exists q(Achete(Marie, Tomate, Safeway, q, hier)) -> Rencontre(Jean,Marie).
+%Q5 
+%Prepare(Safeway, Tomate).
+%Q6 
+%Mange(Jean, Tomate).
+%Q7 
+%Vend(Safeway, Deodorant).
+%Vend(Safeway, Tomate).
+%Q8
+%ApporteCarteCredit(Jean) | ApporteCash(Jean).
+%Q9
+%exists M2(A_Argent(Jean, M2, aujourdhui) & MoinsQue(M2, M1)).
+
+
+
